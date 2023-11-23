@@ -86,18 +86,19 @@ pub fn part_two(input: &str) -> usize {
     for y in min.y..=max.y {
         for x in min.x..=max.x {
             let here = Point::new(x, y);
+            seen.insert(here);
             queue.push_back(here);
         }
     }
 
-    let mut region = HashSet::new();
+    let mut region_count = 0;
     while let Some(here) = queue.pop_front() {
         let sum = points
             .iter()
             .map(|there| here.manhattan_distance(*there))
             .sum::<i32>();
         if sum < 10_000 {
-            region.insert(here);
+            region_count += 1;
             for neighbor in here.neighbors() {
                 if seen.insert(neighbor) {
                     queue.push_back(neighbor);
@@ -106,7 +107,7 @@ pub fn part_two(input: &str) -> usize {
         }
     }
 
-    return region.len();
+    region_count
 }
 
 fn bounds(points: &[Point]) -> (Point, Point) {
