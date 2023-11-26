@@ -22,6 +22,24 @@ impl CardinalDirection {
             CardinalDirection::West => CardinalDirection::East,
         }
     }
+
+    pub fn left(&self) -> Self {
+        match *self {
+            CardinalDirection::North => CardinalDirection::West,
+            CardinalDirection::South => CardinalDirection::East,
+            CardinalDirection::East => CardinalDirection::North,
+            CardinalDirection::West => CardinalDirection::South,
+        }
+    }
+
+    pub fn right(&self) -> Self {
+        match *self {
+            CardinalDirection::North => CardinalDirection::East,
+            CardinalDirection::South => CardinalDirection::West,
+            CardinalDirection::East => CardinalDirection::South,
+            CardinalDirection::West => CardinalDirection::North,
+        }
+    }
 }
 
 pub const CARDINAL_DIRECTIONS: [CardinalDirection; 4] = [
@@ -33,8 +51,8 @@ pub const CARDINAL_DIRECTIONS: [CardinalDirection; 4] = [
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Point2D<T> {
-    pub x: T,
     pub y: T,
+    pub x: T,
 }
 
 fn abs_difference<T: Sub<Output = T> + Ord>(x: T, y: T) -> T {
