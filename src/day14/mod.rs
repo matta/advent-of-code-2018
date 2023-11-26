@@ -1,4 +1,5 @@
-pub fn compute_part_one(prefix: usize) -> u64 {
+pub fn compute_part_one(prefix: u32) -> u64 {
+    let prefix: usize = prefix.try_into().unwrap();
     let mut v: Vec<u8> = Vec::new();
 
     v.push(3);
@@ -31,25 +32,28 @@ pub fn compute_part_one(prefix: usize) -> u64 {
     ret
 }
 
-pub fn compute_part_two(digits_num: usize) -> u64 {
-    let digits = {
-        let mut digits: Vec<u8> = Vec::new();
-        let mut n = digits_num;
+pub fn compute_part_two(needle: u32) -> usize {
+    dbg!(needle);
+    let needle_len = {
+        let mut c: u32 = 0;
+        let mut n = needle;
         loop {
-            digits.push((n % 10) as u8);
+            c += 1;
             n /= 10;
             if n == 0 {
                 break;
             }
         }
-        digits.reverse();
-        digits
+        c
     };
+    let trailing_modulus = 10_u32.checked_pow(needle_len).unwrap();
+
     let mut v: Vec<u8> = Vec::new();
 
     v.push(3);
     v.push(7);
-
+    let mut trailing = 37_u32;
+    trailing %= trailing_modulus;
 
     let mut a: usize = 0;
     let mut b: usize = 1;
@@ -57,26 +61,22 @@ pub fn compute_part_two(digits_num: usize) -> u64 {
         a %= v.len();
         b %= v.len();
 
-        let sum = v[a] + v[b];
+        let mut sum = v[a] + v[b];
         a += v[a] as usize + 1;
         b += v[b] as usize + 1;
 
-        let skip = v.len() as isize - digits.len() as isize + 1;
-        if sum < 10 {
-            v.push(sum);
-        } else {
+        if sum >= 10 {
             v.push(1);
-            v.push(sum - 10);
-        }
-
-        if skip >= 0 {
-            let skip = skip as usize;
-            if let Some(offset) = v[skip..]
-                .windows(digits.len())
-                .position(|window| window == digits)
-            {
-                return (skip + offset).try_into().unwrap();
+            trailing = (trailing * 10) % trailing_modulus + 1;
+            if trailing == needle {
+                return v.len() - needle_len as usize;
             }
+            sum -= 10;
+        }
+        v.push(sum);
+        trailing = (trailing * 10) % trailing_modulus + sum as u32;
+        if trailing == needle {
+            return v.len() - needle_len as usize;
         }
     }
 }
@@ -85,7 +85,7 @@ pub fn compute_part_two(digits_num: usize) -> u64 {
 mod tests {
     use super::*;
 
-    const INPUT: usize = 509671;
+    const INPUT: u32 = 509671;
 
     #[test]
     fn test_part_one_example() {
