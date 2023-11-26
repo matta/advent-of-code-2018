@@ -117,14 +117,15 @@ fn parse(input: &str) -> (Vec<Vec<u8>>, Carts) {
     (map, carts)
 }
 
-enum TickResult {
-    CollisionAt(Point),
-    SafePassage(Carts),
-}
-
-fn tick(map: &[Vec<u8>], carts: &Carts) -> TickResult {
+fn tick(map: &[Vec<u8>], carts: &Carts) -> (Option<Point>, Carts) {
     let mut next_carts = carts.clone();
+    let mut first_collision_at = None;
     for (from_pos, from_cart) in carts {
+        if next_carts.remove(from_pos).is_none() {
+            // This cart was removed in a prior collision.
+            assert!(first_collision_at.is_some());
+            continue;
+        }
         let next_pos = from_pos.cardinal_neighbor(from_cart.current_direction);
         let next_cart = match (map[next_pos.y][next_pos.x], from_cart.current_direction) {
             (b'|', CardinalDirection::North | CardinalDirection::South) => *from_cart,
@@ -142,26 +143,53 @@ fn tick(map: &[Vec<u8>], carts: &Carts) -> TickResult {
             (b'+', _) => from_cart.choose_turn(),
             invalid => panic!("invalid cart state: {:?}", invalid),
         };
-        assert!(next_carts.remove(from_pos).is_some());
         if next_carts.insert(next_pos, next_cart).is_some() {
-            return TickResult::CollisionAt(next_pos);
+            if first_collision_at.is_none() {
+                first_collision_at = Some(next_pos);
+            }
+            next_carts.remove(&next_pos);
         }
     }
 
-    TickResult::SafePassage(next_carts)
+    (first_collision_at, next_carts)
 }
 
-pub fn compute(input: &str) -> Point {
+pub fn compute_part_one(input: &str) -> Point {
     let (map, mut carts) = parse(input);
-    let mut step = 1;
+    let mut ticks = 1;
     loop {
-        println!("Step: {}", step);
         // print_map(&map, &carts);
-        match tick(&map, &carts) {
-            TickResult::CollisionAt(pos) => return pos,
-            TickResult::SafePassage(next_carts) => carts = next_carts,
+        let (possible_collision, next_carts) = tick(&map, &carts);
+        if let Some(pos) = possible_collision {
+            return pos;
         }
-        step += 1;
+        carts = next_carts;
+        ticks += 1;
+        if ticks > 200 {
+            unreachable!("looped for too many ticks: {}", ticks);
+        }
+    }
+}
+
+pub fn compute_part_two(input: &str) -> Point {
+    let (map, mut carts) = parse(input);
+    let mut ticks = 1;
+
+    // Cart count must be odd for the loop to terminate.
+    assert!(carts.len() % 2 == 1);
+
+    loop {
+        // print_map(&map, &carts);
+        let (_, next_carts) = tick(&map, &carts);
+        carts = next_carts;
+        if carts.len() == 1 {
+            return *carts.keys().next().unwrap();
+        }
+        // println!("Step: {}  Cart count: {}", ticks, carts.len());
+        ticks += 1;
+        if ticks > 100_000 {
+            unreachable!("looped for too many ticks: {}", ticks);
+        }
     }
 }
 
@@ -180,8 +208,17 @@ mod tests {
 "#;
 
     #[test]
-    fn test() {
-        assert_eq!(compute(EXAMPLE_INPUT), Point::new(7, 3));
-        assert_eq!(compute(INPUT), Point::new(115, 138));
+    fn test_part_one_example() {
+        assert_eq!(compute_part_one(EXAMPLE_INPUT), Point::new(7, 3));
+    }
+
+    #[test]
+    fn test_part_one() {
+        assert_eq!(compute_part_one(INPUT), Point::new(115, 138));
+    }
+
+    #[test]
+    fn test_part_two() {
+        assert_eq!(compute_part_two(INPUT), Point::new(0, 98));
     }
 }
