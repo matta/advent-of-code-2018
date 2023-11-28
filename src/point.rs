@@ -205,7 +205,7 @@ impl<T: Add<Output = T> + Sub<Output = T> + One + Copy> Iterator for NeighborsIt
 
 pub struct CardinalNeighborsIterator<T> {
     point: Point2D<T>,
-    current_direction: i32,
+    current_direction: u8,
 }
 
 impl<T> CardinalNeighborsIterator<T> {
@@ -217,7 +217,7 @@ impl<T> CardinalNeighborsIterator<T> {
     }
 }
 
-impl<T: Add<Output = T> + Sub<Output = T> + From<i32> + Copy> Iterator
+impl<T: Add<Output = T> + Sub<Output = T> + From<u8> + Copy> Iterator
     for CardinalNeighborsIterator<T>
 {
     type Item = Point2D<T>;
@@ -227,19 +227,19 @@ impl<T: Add<Output = T> + Sub<Output = T> + From<i32> + Copy> Iterator
             match self.current_direction {
                 0 => Self::Item {
                     x: self.point.x,
-                    y: self.point.y + T::from(1),
+                    y: self.point.y - T::from(1),
                 },
                 1 => Self::Item {
-                    x: self.point.x,
-                    y: self.point.y - T::from(1),
+                    x: self.point.x - T::from(1),
+                    y: self.point.y,
                 },
                 2 => Self::Item {
                     x: self.point.x + T::from(1),
                     y: self.point.y,
                 },
                 3 => Self::Item {
-                    x: self.point.x - T::from(1),
-                    y: self.point.y,
+                    x: self.point.x,
+                    y: self.point.y + T::from(1),
                 },
                 _ => return None,
             }
