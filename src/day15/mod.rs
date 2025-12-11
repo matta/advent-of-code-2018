@@ -102,11 +102,9 @@ impl Grid {
         let tiles = input
             .trim()
             .lines()
-            .enumerate()
-            .map(|(_y, line)| {
+            .map(|line| {
                 line.chars()
-                    .enumerate()
-                    .map(|(_x, ch)| match ch {
+                    .map(|ch| match ch {
                         '#' | '.' => Tile::new(ch),
                         'E' | 'G' => Tile::Creature(Creature::new(Kind::new(ch))),
                         ch => panic!("invalid input: '{}'", ch),
@@ -122,8 +120,8 @@ impl Grid {
     }
 
     fn eprint(&self) {
-        for (_y, row) in self.tiles.iter().enumerate() {
-            for (_x, tile) in row.iter().enumerate() {
+        for row in self.tiles.iter() {
+            for tile in row.iter() {
                 eprint!("{}", tile.as_char());
             }
             let mut prefix = "    ";

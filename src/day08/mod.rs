@@ -1,4 +1,4 @@
-fn compute(input: &str, compute: fn(&mut (dyn Iterator<Item = i32>)) -> i32) -> i32 {
+fn compute(input: &str, compute: fn(&mut dyn Iterator<Item = i32>) -> i32) -> i32 {
     let mut it = input.split_whitespace().map(|s| s.parse::<i32>().unwrap());
     compute(&mut it)
 }
