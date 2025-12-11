@@ -56,11 +56,7 @@ pub struct Point2D<T> {
 }
 
 fn abs_difference<T: Sub<Output = T> + Ord>(x: T, y: T) -> T {
-    if x < y {
-        y - x
-    } else {
-        x - y
-    }
+    if x < y { y - x } else { x - y }
 }
 
 impl<T: Add<Output = T> + Sub<Output = T> + Ord + Copy + TryFrom<usize> + TryInto<usize> + One>

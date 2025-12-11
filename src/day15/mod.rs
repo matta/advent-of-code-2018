@@ -182,14 +182,14 @@ impl Grid {
 
         let mut victim: Option<(Creature, Pos)> = None;
         for neighbor in pos.cardinal_neighbors() {
-            if let Tile::Creature(neighbor_creature) = self.tiles[neighbor.y][neighbor.x] {
-                if neighbor_creature.kind == enemy_kind {
-                    match victim {
-                        None => victim = Some((neighbor_creature, neighbor)),
-                        Some((victim_creature, _)) => {
-                            if neighbor_creature.health < victim_creature.health {
-                                victim = Some((neighbor_creature, neighbor));
-                            }
+            if let Tile::Creature(neighbor_creature) = self.tiles[neighbor.y][neighbor.x]
+                && neighbor_creature.kind == enemy_kind
+            {
+                match victim {
+                    None => victim = Some((neighbor_creature, neighbor)),
+                    Some((victim_creature, _)) => {
+                        if neighbor_creature.health < victim_creature.health {
+                            victim = Some((neighbor_creature, neighbor));
                         }
                     }
                 }
